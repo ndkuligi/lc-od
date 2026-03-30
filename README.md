@@ -93,17 +93,14 @@ source("launch_app.R")
 ## 📁 Repository Structure
 
 ```
-.
-├── app.R
-├── launch_app.R
-├── renv.lock
-├── renv/
-│   ├── activate.R
-│   └── settings.json
-├── README.md
-└── build_release/
-    ├── START_LCOD.bat
-    └── README_START.txt
+lc-od/
+  app.R
+  launch_app.R
+  renv.lock
+  renv/
+  README.md
+  LICENSE
+  .gitignore
 ```
 
 ---
