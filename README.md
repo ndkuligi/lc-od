@@ -6,6 +6,28 @@
 
 The tool is designed for researchers working with clay minerals and infrared spectroscopy, providing a reproducible and user-friendly workflow.
 
+Input Data Format
+
+The application accepts FTIR spectra stored in `.csv` files.
+
+Each file must contain exactly **two columns**:
+
+1) wavenumber (in cm⁻¹)
+2) signal as ATR absorbance
+
+Requirements
+
+* Files must **not contain headers or column names**
+* Supported column separators: `;`, `,`, or tab
+* If `,` is used as the **column separator**, numeric values must use `.` as the **decimal separator**
+* If `;` or tab is used as the **column separator**, both `.` and `,` are accepted as decimal separators
+* Data must be numeric and contain no missing or invalid values
+
+### Notes
+
+* Spectra do not need to share the same wavenumber grid — the application will automatically align them
+* Files that cannot be read or processed correctly will be skipped and reported in the application
+
 ---
 
 ## 🚀 For End Users (No Installation Required)
