@@ -4,6 +4,8 @@
 
 **LC-OD** is a Shiny-based application for calculating the layer charge of smectites using the spectroscopic OD method from ATR-IR spectra (Kuligiewicz et al., 2015).
 
+Kuligiewicz, A., Derkowski, A., Emmerich, K., Christidis, G. E., Tsiantos, C., Gionis, V., & Chryssikos, G. D. (2015). Measuring the Layer Charge of Dioctahedral Smectite by O–D Vibrational Spectroscopy. Clays and Clay Minerals, 63(6), 443-456. https://doi.org/10.1346/ccmn.2015.0630603 
+
 The tool is designed for researchers working with clay minerals and infrared spectroscopy, providing a reproducible and user-friendly workflow.
 
 Input Data Format
