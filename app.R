@@ -1,7 +1,13 @@
+# LC-OD - Shiny application for the layer charge determination using the OD method
+# Based on:
+# Kuligiewicz et al. (2015), https://doi.org/10.1346/ccmn.2015.0630603 
+# Copyright © Institute of Geological Sciences, Polish Academy of Sciences
+# Author: Artur Kuligiewicz
+# Version: 1.1.0
+# Repository: https://github.com/ndkuligi/lc-od
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
 
 library(shiny)
 library(ggplot2)
@@ -15,8 +21,7 @@ library(plotly)
 # Helper functions
 # =========================================================
 
-read_ftir_csv <- function(file) {
-  
+read_ftir_file <- function(file) {
   lines <- readLines(file, n = 20, warn = FALSE)
   lines <- trimws(lines)
   lines <- lines[lines != ""]
@@ -32,15 +37,23 @@ read_ftir_csv <- function(file) {
     )
   }
   
-  candidate_separators <- c(";", ",", "\t")
+  split_line <- function(line, sep) {
+    if (sep == "space") {
+      parts <- strsplit(line, "\\s+")[[1]]
+    } else {
+      parts <- strsplit(line, split = sep, fixed = TRUE)[[1]]
+    }
+    parts <- trimws(parts)
+    parts[parts != ""]
+  }
+  
+  candidate_separators <- c(";", ",", "\t", "space")
   
   separator_score <- sapply(candidate_separators, function(sep) {
     score <- 0
     
     for (line in lines) {
-      parts <- strsplit(line, split = sep, fixed = TRUE)[[1]]
-      parts <- trimws(parts)
-      
+      parts <- split_line(line, sep)
       if (length(parts) == 2 && all(is_numeric_string(parts))) {
         score <- score + 1
       }
@@ -55,18 +68,31 @@ read_ftir_csv <- function(file) {
     stop(paste("Could not detect the column separator in file:", basename(file)))
   }
   
-  data <- read.table(
-    file = file,
-    sep = best_sep,
-    header = FALSE,
-    stringsAsFactors = FALSE,
-    strip.white = TRUE,
-    colClasses = "character"
-  )
-  
-  if (ncol(data) != 2) {
-    stop(paste("File", basename(file), "does not contain exactly 2 columns."))
+  if (best_sep == "space") {
+    data <- read.table(
+      file = file,
+      header = FALSE,
+      stringsAsFactors = FALSE,
+      strip.white = TRUE,
+      fill = TRUE,
+      colClasses = "character"
+    )
+  } else {
+    data <- read.table(
+      file = file,
+      sep = best_sep,
+      header = FALSE,
+      stringsAsFactors = FALSE,
+      strip.white = TRUE,
+      colClasses = "character"
+    )
   }
+  
+  if (ncol(data) < 2) {
+    stop(paste("File", basename(file), "does not contain at least 2 columns."))
+  }
+  
+  data <- data[, 1:2, drop = FALSE]
   
   data[] <- lapply(data, function(x) {
     x <- trimws(x)
@@ -91,7 +117,7 @@ prepare_data <- function(files,
                          file_names = NULL,
                          wn_plot_min = 2550,
                          wn_plot_max = 2850,
-                         wn_min = 2650,
+                         wn_min = 2600,
                          wn_max = 2720,
                          sg_window = 13) {
   
@@ -114,10 +140,10 @@ prepare_data <- function(files,
     
     if (nrow(df) < 3) return(NULL)
     
-    # approx() wymaga rosnącej osi X
+    # approx() requires ascending X values
     df <- df[order(df$wavenumber, decreasing = FALSE), , drop = FALSE]
     
-    # usuń zduplikowane wartości wavenumber
+    # remove duplicated wavenumber values
     df <- df[!duplicated(df$wavenumber), , drop = FALSE]
     
     if (nrow(df) < 3) return(NULL)
@@ -133,7 +159,7 @@ prepare_data <- function(files,
   
   for (i in seq_along(files)) {
     raw_data_list[[i]] <- tryCatch(
-      read_ftir_csv(files[i]),
+      read_ftir_file(files[i]),
       error = function(e) {
         skipped_messages <<- c(
           skipped_messages,
@@ -177,7 +203,7 @@ prepare_data <- function(files,
   }
   
   # ---------------------------------------------------------
-  # Interpolation of all spectra to a common wavelenght grid
+  # Interpolation of all spectra to a common wavelength grid
   # ---------------------------------------------------------
   aligned_signals <- list()
   valid_names <- character(0)
@@ -186,7 +212,6 @@ prepare_data <- function(files,
   ref_range <- range(reference_wn, na.rm = TRUE, finite = TRUE)
   
   for (i in seq_along(raw_data_list)) {
-    
     current_raw <- raw_data_list[[i]]
     
     if (is.null(current_raw)) {
@@ -445,15 +470,37 @@ prepare_data <- function(files,
   sd_position <- if (length(positions) > 1) sd(positions, na.rm = TRUE) else NA_real_
   n_positions <- sum(is.finite(positions))
   
-  LC_SFM <- if (is.finite(mean_position)) 0.6 - (mean_position - 2686) * 0.03 else NA_real_
-  LC_AAM <- if (is.finite(mean_position)) 0.38 - (mean_position - 2686) * 0.015 else NA_real_
+  LC_SFM <- if (is.finite(mean_position)) {
+    0.6 - (mean_position - 2686) * 0.03
+  } else {
+    NA_real_
+  }
+  
+  LC_AAM <- if (is.finite(mean_position)) {
+    0.38 - (mean_position - 2686) * 0.015
+  } else {
+    NA_real_
+  }
+  
+  if (is.finite(mean_position) && is.finite(sd_position) && n_positions > 1) {
+    t_crit <- qt(0.975, n_positions - 1)
+    sem_position <- sd_position / sqrt(n_positions)
+    
+    LC_SFM_ERROR <- sqrt((0.01)^2 + ((mean_position - 2686) * 0.001)^2 + (-0.03 * sem_position * t_crit)^2)
+    LC_AAM_ERROR <- sqrt((0.01)^2 + ((mean_position - 2686) * 0.001)^2 + (-0.015 * sem_position * t_crit)^2)
+  } else {
+    LC_SFM_ERROR <- NA_real_
+    LC_AAM_ERROR <- NA_real_
+  }
   
   band_statistics <- data.frame(
     mean_wavenumber = mean_position,
     sd_wavenumber = sd_position,
     n = n_positions,
     LC_SFM = LC_SFM,
+    LC_SFM_ERROR = LC_SFM_ERROR,
     LC_AAM = LC_AAM,
+    LC_AAM_ERROR = LC_AAM_ERROR,
     SG_window_points = sg_window
   )
   
@@ -495,9 +542,9 @@ ui <- fluidPage(
         h4("Loaded files"),
         fileInput(
           inputId = "files_csv",
-          label = "Load CSV files",
+          label = "Load spectral files",
           multiple = TRUE,
-          accept = c(".csv")
+          accept = c(".csv", ".xy", ".dpt")
         ),
         actionButton("clear_data", "Load new set / clear data"),
         tags$hr(),
@@ -554,7 +601,7 @@ server <- function(input, output, session) {
       file_names = input$files_csv$name,
       wn_plot_min = 2550,
       wn_plot_max = 2850,
-      wn_min = 2650,
+      wn_min = 2600,
       wn_max = 2720,
       sg_window = as.numeric(input$sg_window)
     )
@@ -880,7 +927,7 @@ server <- function(input, output, session) {
     req(data)
     
     stats_display <- data$band_statistics %>%
-      dplyr::select(-SG_window_points)
+      dplyr::select(-SG_window_points, -LC_SFM_ERROR, -LC_AAM_ERROR)
     
     stats_display
   }, digits = 4)
