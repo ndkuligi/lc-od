@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "LC-OD Calculator"
+message: "If you use this software, please cite it as below."
+type: software
+
+authors:
+
+* family-names: "Kuligiewicz"
+  given-names: "Artur"
+  affiliation: "Institute of Geological Sciences, Polish Academy of Sciences"
+  orcid: "https://orcid.org/0000-0002-5634-0093"
+
+repository-code: "https://github.com/ndkuligi/lc-od"
+
+license: "MPL-2.0"
+
+version: "1.1.0"
+
+date-released: 2026-06-15
+
+abstract: >
+Shiny application for estimating layer charge from
+the position of the O–D stretching band in FTIR spectra.
+
+keywords:
+
+* FTIR
+* clay minerals
+* layer charge
+* spectroscopy
+* smectite
+* vermiculite
+* R
+* Shiny
+
+copyright: >
+Copyright © Institute of Geological Sciences,
+Polish Academy of Sciences
