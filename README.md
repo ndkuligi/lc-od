@@ -142,3 +142,24 @@ Artur Kuligiewicz, Ph.D.
 
 ---
 
+## Version 1.1.0 — main updates
+
+### New features
+
+* Added support for `.xy` and `.dpt` spectral files
+* Improved automatic separator detection
+* Added uncertainty estimates for layer-charge calculations
+* Improved robustness of spectral import
+
+### Methodological changes
+
+* Expanded O–D minimum search range from `2650–2720 cm⁻¹` to `2600–2720 cm⁻¹`
+
+### Export improvements
+
+* Exported statistics now include:
+
+  * `LC_SFM_ERROR`
+  * `LC_AAM_ERROR`
+
+
