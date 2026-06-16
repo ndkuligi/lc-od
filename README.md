@@ -10,12 +10,9 @@ The tool is designed for researchers working with clay minerals and infrared spe
 
 Input Data Format
 
-The application accepts FTIR spectra stored in `.csv` files.
+The application accepts FTIR spectra stored in `.csv`, '.dpt', or '.xy' files.
 
-Each file must contain exactly **two columns**:
-
-1) wavenumber (in cm⁻¹)
-2) signal as ATR absorbance
+Each file must contain wavenumbers (in cm⁻¹) and signal (ATR absorbance) in the first two columns.
 
 Requirements
 
@@ -29,38 +26,6 @@ Requirements
 
 * Spectra do not need to share the same wavenumber grid — the application will automatically align them
 * Files that cannot be read or processed correctly will be skipped and reported in the application
-
----
-
-## 🚀 For End Users (No Installation Required)
-
-A fully portable version of the application is available.
-
-### How to run:
-
-1. Go to the **Releases** section of this repository
-2. Download the latest version:
-
-   ```
-   LC-OD_x.x_Windows.zip
-   ```
-3. Extract the ZIP archive to a folder (e.g. `C:\LC-OD\`)
-4. Open the folder and double-click:
-
-   ```
-   START_LCOD.bat
-   ```
-5. The application will automatically open in your web browser
-
----
-
-### Important Notes
-
-* Do **not** run the application directly from the ZIP file
-* Do **not** move or delete the `R` or `Application` folders
-* Do **not** close the console window while using the app
-
----
 
 ## 🧪 For Developers
 
@@ -125,6 +90,11 @@ This version is intended for:
 * teaching and workshops
 
 ---
+### Important Notes
+
+* Do **not** run the application directly from the ZIP file
+* Do **not** move or delete the `R` or `Application` folders
+* Do **not** close the console window while using the app
 
 ## ⚠️ Notes
 
