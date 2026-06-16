@@ -109,6 +109,10 @@ lc-od/
 
 ## 📦 Portable Version
 
+A portable Windows version is available from the latest release:
+
+https://github.com/ndkuligi/lc-od/releases/latest/download/LC-OD-portable-Windows.zip
+
 The portable distribution includes:
 
 * embedded R environment
